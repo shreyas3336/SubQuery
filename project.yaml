@@ -1,6 +1,6 @@
 specVersion: 1.0.0
 name: Inc
-version: v0.0.1
+version: 0.0.0
 runner:
   node:
     name: '@subql/node'
@@ -8,14 +8,13 @@ runner:
   query:
     name: '@subql/query'
     version: '*'
-description: SubQuery Testing
-repository: https://github.com/shreyas3336/SubQuery
+description: A basic Acala EVM example
+repository: https://github.com/shreyas3336/SubQuery.git
 schema:
   file: ./schema.graphql
 network:
   chainId: '0x5c562e6300954998233c9a40b6b86f3028977e6d32d0da1af207738d19f98c1b'
   endpoint: wss://mandala-tc7-rpcnode.aca-dev.network/ws
-  startBlock: 1332174
   chaintypes:
     file: ./dist/chaintypes.js
 dataSources:
@@ -25,14 +24,14 @@ dataSources:
       file: ./dist/acalaEvm.js
       options:
         abi: erc20
-        address: '0x0000000000000000000100000000000000000000'
+        address: '0x66362069f0185fe02c948307f1cceb9c356b8b77'
     assets:
       erc20:
-        file: ./erc20.abi.json
+        file: ./abi/Inc.json
     mapping:
-      file: ./dist/index.js
+      file: ./src/mappings/mappingHandlers.ts
       handlers:
-        - handler: handleAcalaEvmEvent
+        - handler: handleIncrement
           kind: substrate/AcalaEvmEvent
           filter:
             topics:

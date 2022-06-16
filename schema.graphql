@@ -1,8 +1,6 @@
-type Transaction @entity {
+type Increment @entity {
 
   id: ID! # Transaction hash
 
   value: BigInt!
-
-  from: String!
 }
