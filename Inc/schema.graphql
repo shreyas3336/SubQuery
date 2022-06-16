@@ -1,0 +1,8 @@
+type Transaction @entity {
+
+  id: ID! # Transaction hash
+
+  value: BigInt!
+
+  from: String!
+}
