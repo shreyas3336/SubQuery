@@ -29,7 +29,7 @@ dataSources:
       erc20:
         file: ./abi/Inc.json
     mapping:
-      file: ./src/mappings/mappingHandlers.ts
+      file: ./dist/index.js
       handlers:
         - handler: handleIncrement
           kind: substrate/AcalaEvmEvent
