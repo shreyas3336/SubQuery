@@ -19,7 +19,7 @@ network:
     file: ./dist/chaintypes.js
 dataSources:
   - kind: substrate/AcalaEvm
-    startBlock: 1000000
+    startBlock: 1332168
     processor:
       file: ./dist/acalaEvm.js
       options:
