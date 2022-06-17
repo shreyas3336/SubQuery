@@ -19,6 +19,17 @@ type CreateVest = [string,string,string,BigNumber,BigNumber,string,string, Boole
     wrappedAssetTicker: string;
     transferable: Boolean;
 };
+type TransferWrapped = [string,string,string,BigNumber] & {
+    userAddress: string;
+    wrappedTokenAddress: string;
+    receiverAddress: string;
+    amount: BigNumber;
+};
+type WithdrawController = [string,BigNumber,string] & {
+    userAddress: string;
+    amount: BigNumber;
+    wrappedTokenAddress: string;
+};
 
 function generateID(_user: string, _ticker: string): string {
     return _user.concat("-LOCK-").concat(_ticker);
@@ -93,4 +104,77 @@ export async function handleCreateVest(event: AcalaEvmCall<CreateVest>): Promise
         userHoldings.save();
         derivative.save();
     }
+}
+
+export async function handleTransferWrapped(event: AcalaEvmCall<TransferWrapped>): Promise<void>{
+    // Getting all the required data from the Event.
+  let _userAddress = event.args.userAddress.toString();
+  let _wrappedTokenAddress = event.args.wrappedTokenAddress.toString();
+  let _receiverAddress = event.args.receiverAddress.toString();
+  let _transferAmount = event.args.amount.toBigInt();
+
+  // Check the corresponding derivative asset exists or not.
+  if (_receiverAddress.toLocaleLowerCase() != "0x9C27C76239E69555103C43AFD87C41628E8f8a14".toLocaleLowerCase()){
+    let derivative = await Derivative.get(_wrappedTokenAddress);
+    if(derivative != undefined){
+      // Creating a unique User ID, i.e. a combination of the User Address & the Wrapped Asset Address.
+      let senderID = generateID(_userAddress, _wrappedTokenAddress);
+
+      // Retrieving the User w.r.t the Wrapped Asset
+      let senderUserHoldings = await UserHolding.get(senderID);
+      if(senderUserHoldings != undefined){
+        // Updating the Balance of Sender Address
+        let senderTokenAmount = senderUserHoldings.amount;
+        senderUserHoldings.amount = senderTokenAmount - _transferAmount;
+        senderUserHoldings.save();
+
+        // Creating a unique User ID, i.e. a combination of the User Address & the Wrapped Asset Address.
+        let receiverID = generateID(_receiverAddress, _wrappedTokenAddress);
+
+        // Checking if the User already exists w.r.t the Wrapped Asset
+        let receiverUserHoldings = await UserHolding.get(receiverID);
+        if (receiverUserHoldings === undefined){
+          // If the User doesn't exist, create one.
+          receiverUserHoldings = new UserHolding(receiverID);
+          receiverUserHoldings.address = _receiverAddress;
+          receiverUserHoldings.amount = BigInt(0);
+          receiverUserHoldings.derivativeId = derivative.id.toString();
+        }
+
+        // Updating the Balance of Receiver Address
+        let receiverTokenAmount = receiverUserHoldings.amount;
+        receiverUserHoldings.amount = receiverTokenAmount + _transferAmount;
+        receiverUserHoldings.save();
+      }
+      derivative.save();
+    }
+  }
+}
+
+export async function handleWithdraw(event: AcalaEvmCall<WithdrawController>): Promise<void>{
+    // Getting all the required data from the Event.
+  let _userAddress = event.args.userAddress.toString();
+  let _amount = event.args.amount.toBigInt();
+  let _wrappedTokenAddress = event.args.wrappedTokenAddress.toString();
+
+  // Loading the Derivative Asset.
+  let derivative = await Derivative.get(_wrappedTokenAddress);
+  if(derivative != undefined){
+    // Decreasing the Total Supply of the Derivative Asset.
+    let derivativeTotalSupply = derivative.totalSupply;
+    derivative.totalSupply = derivativeTotalSupply - _amount;
+
+    // Creating a unique User ID, i.e. a combination of the User Address & the Wrapped Asset Address.
+    let userID = generateID(_userAddress, _wrappedTokenAddress);
+
+    // Retrieving the User w.r.t the Wrapped Asset
+    let userHoldings = await UserHolding.get(userID);
+    if(userHoldings != undefined){
+      // Updating the Balance of User Address
+      let userTokenAmount = userHoldings.amount;
+      userHoldings.amount = userTokenAmount - _amount;
+      userHoldings.save();
+    }
+    derivative.save();
+  }
 }

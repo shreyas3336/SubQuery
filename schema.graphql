@@ -4,6 +4,7 @@ type Project @entity {
   projectTokenAddress: Bytes!
   projectTokenTicker: String!
   projectTokenDecimal: BigInt!
+  derivative: [Derivative] @derivedFrom(field: "project")
 }
 
 type Derivative @entity {
@@ -12,6 +13,7 @@ type Derivative @entity {
   unlockTime: BigInt!
   totalSupply: BigInt!
   project: Project
+  holder: [UserHolding] @derivedFrom(field: "derivative")
 }
 
 type UserHolding @entity {
