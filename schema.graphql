@@ -1,8 +1,15 @@
-type Increment @entity {
+type Project @entity {
+  id: ID!
+  projectOwnerAddress: Bytes! 
+  projectName: String!
+  projectTokenAddress: Bytes!
+  projectTokenTicker: String!
+  projectDocHash: String!
+  projectTokenDecimal: BigInt!
+}
 
-  id: ID! # Transaction hash
-
-  value: BigInt!
-
-  initiator: String!
+type Implementation @entity {
+  id: ID!
+  newImplementationAddress: String!
+  timestamp: BigInt!
 }
