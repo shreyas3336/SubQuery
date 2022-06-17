@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: Master
+name: Controller
 version: 0.0.1
 runner:
   node:
@@ -8,7 +8,8 @@ runner:
   query:
     name: '@subql/query'
     version: '*'
-description: Master Subgraph
+description: Controller Reverse Mapping testing
+
 repository: https://github.com/shreyas3336/SubQuery
 schema:
   file: ./schema.graphql
@@ -25,30 +26,20 @@ dataSources:
       file: ./dist/acalaEvm.js
       options:
         abi: controller
-        address: "0x9C27C76239E69555103C43AFD87C41628E8f8a14"
-      assets:
-        controller:
-          file: ./abi/Controller.json
-      mapping:
-        file: ./dist/index.js
-        handlers:
-          - handler: handleProjectInfo
-            kind: substrate/AcalaEvmEvent
-            filter:
-              topics:
-                - ProjectInfo(address indexed tokenAddress,string tokenTicker,address creator,uint256 tokenDecimal)
-          - handler: handleCreateVest
-            kind: substrate/AcalaEvmEvent
-            filter:
-              topics:
-                - CreateVest(address indexed assetAddress,address creator,address userAddress,uint256 userAmount,uint256 unlockTime,address wrappedERC20Address,string wrappedAssetTicker,bool transferable)
-          - handler: handleTransferWrapped
-            kind: substrate/AcalaEvmEvent
-            filter:
-              topics:
-                - TransferWrapped(address userAddress,address indexed wrappedTokenAddress,address receiverAddress,uint256 amount)
-          - handler: handleWithdraw
-            kind: substrate/AcalaEvmEvent
-            filter:
-              topics:
-                - Withdraw(address indexed userAddress,uint256 amount,address wrappedTokenAddress)
+        address: '0x9C27C76239E69555103C43AFD87C41628E8f8a14'
+    assets:
+      controller:
+        file: ./abi/Controller.json
+    mapping:
+      file: ./dist/index.js
+      handlers:
+        - handler: handleProjectInfo
+          kind: substrate/AcalaEvmEvent
+          filter:
+            topics:
+              - ProjectInfo(address indexed tokenAddress,string tokenTicker,address creator,uint256 tokenDecimal)
+        - handler: handleCreateVest
+          kind: substrate/AcalaEvmEvent
+          filter:
+            topics:
+              - CreateVest(address indexed assetAddress,address creator,address userAddress,uint256 userAmount,uint256 unlockTime,address wrappedERC20Address,string wrappedAssetTicker,bool transferable)

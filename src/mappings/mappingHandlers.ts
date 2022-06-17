@@ -1,17 +1,14 @@
-import {Project, Derivative, UserHoldings} from "../types";
+import {Project, Derivative} from "../types";
 import { AcalaEvmEvent, AcalaEvmCall } from '@subql/acala-evm-processor';
-import { BigNumber, logger } from "ethers"; 
-import { bool } from "@polkadot/types-codec";
+import { BigNumber } from "ethers";
 
 // Setup types from ABI
 type ProjectInfo = [string, string, string, BigNumber] & { 
     tokenAddress: string; 
     tokenTicker: string; 
     creator: string; 
-    tokenDecimal:BigNumber; 
+    tokenDecimal: BigNumber; 
 };
-
-// Setup types from ABI
 type CreateVest = [string,string,string,BigNumber,BigNumber,string,string, Boolean] & {
     assetAddress: string;
     creator: string;
@@ -21,18 +18,7 @@ type CreateVest = [string,string,string,BigNumber,BigNumber,string,string, Boole
     wrappedERC20Address: string;
     wrappedAssetTicker: string;
     transferable: Boolean;
-}
-type TransferWrapped = [string,string,string,BigNumber] & {
-    userAddress: string;
-    wrappedTokenAddress: string;
-    receiverAddress: string;
-    amount: BigNumber;
-}
-type WithdrawController = [string,BigNumber,string] & {
-    userAddress: string;
-    amount: BigNumber;
-    wrappedTokenAddress: string;
-}
+};
 
 function generateID(_user: string, _ticker: string): string {
     return _user.concat("-LOCK-").concat(_ticker);
@@ -80,103 +66,12 @@ export async function handleCreateVest(event: AcalaEvmCall<CreateVest>): Promise
             derivative = new Derivative(_wrappedTokenAddress);
             derivative.wrappedTokenTicker = _wrappedTokenTicker;
             derivative.totalSupply = BigInt(0);
-            derivative.projectId = project.id.toString();
             derivative.unlockTime = _unlockTime;
             derivative.save();
         }
         // Increase the Total Supply of the Derivative Asset.
         let derivativeSupply = derivative.totalSupply;
         derivative.totalSupply = derivativeSupply + _tokenAmount;
-
-        // Creating a unique User ID, i.e. a combination of the User Address & the Wrapped Asset Address.
-        let userHoldingsID = generateID(_userAddress, _wrappedTokenAddress);
-
-        // Checking if the User already exists w.r.t the Wrapped Asset
-        let userHoldings = await UserHoldings.get(userHoldingsID);
-        if (userHoldings === undefined){
-            // If the User doesn't exist, create one.
-            userHoldings = new UserHoldings(userHoldingsID);
-            userHoldings.tokenAmount = BigInt(0);
-            userHoldings.address = _userAddress;
-            userHoldings.derivativeId = derivative.id.toString();
-          }
-          // Increase the Wrapped Asset Holdings of the User.
-          let userTokenAmount = userHoldings.tokenAmount;
-          userHoldings.tokenAmount = userTokenAmount + _tokenAmount;
-          userHoldings.save();
-          derivative.save();
+        derivative.save();
     }
-}
-
-export async function handleTransferWrapped(event: AcalaEvmCall<TransferWrapped>): Promise<void>{
-    // Getting all the required data from the Event.
-  let _userAddress = event.args.userAddress.toString();
-  let _wrappedTokenAddress = event.args.wrappedTokenAddress.toString();
-  let _receiverAddress = event.args.receiverAddress.toString();
-  let _transferAmount = event.args.amount.toBigInt();
-
-  // Check the corresponding derivative asset exists or not.
-  if (_receiverAddress.toLocaleLowerCase() != "0x9C27C76239E69555103C43AFD87C41628E8f8a14".toLocaleLowerCase()){
-    let derivative = await Derivative.get(_wrappedTokenAddress);
-    if(derivative != undefined){
-      // Creating a unique User ID, i.e. a combination of the User Address & the Wrapped Asset Address.
-      let senderID = generateID(_userAddress, _wrappedTokenAddress);
-
-      // Retrieving the User w.r.t the Wrapped Asset
-      let senderUserHoldings = await UserHoldings.get(senderID);
-      if(senderUserHoldings != undefined){
-        // Updating the Balance of Sender Address
-        let senderTokenAmount = senderUserHoldings.tokenAmount;
-        senderUserHoldings.tokenAmount = senderTokenAmount - _transferAmount;
-        senderUserHoldings.save();
-
-        // Creating a unique User ID, i.e. a combination of the User Address & the Wrapped Asset Address.
-        let receiverID = generateID(_receiverAddress, _wrappedTokenAddress);
-
-        // Checking if the User already exists w.r.t the Wrapped Asset
-        let receiverUserHoldings = await UserHoldings.get(receiverID);
-        if (receiverUserHoldings === undefined){
-          // If the User doesn't exist, create one.
-          receiverUserHoldings = new UserHoldings(receiverID);
-          receiverUserHoldings.address = _receiverAddress;
-          receiverUserHoldings.tokenAmount = BigInt(0);
-          receiverUserHoldings.derivativeId = derivative.id.toString();
-        }
-
-        // Updating the Balance of Receiver Address
-        let receiverTokenAmount = receiverUserHoldings.tokenAmount;
-        receiverUserHoldings.tokenAmount = receiverTokenAmount + _transferAmount;
-        receiverUserHoldings.save();
-      }
-      derivative.save();
-    }
-  }
-}
-
-export async function handleWithdraw(event: AcalaEvmCall<WithdrawController>): Promise<void>{
-    // Getting all the required data from the Event.
-  let _userAddress = event.args.userAddress.toString();
-  let _amount = event.args.amount.toBigInt();
-  let _wrappedTokenAddress = event.args.wrappedTokenAddress.toString();
-
-  // Loading the Derivative Asset.
-  let derivative = await Derivative.get(_wrappedTokenAddress);
-  if(derivative != undefined){
-    // Decreasing the Total Supply of the Derivative Asset.
-    let derivativeTotalSupply = derivative.totalSupply;
-    derivative.totalSupply = derivativeTotalSupply - _amount;
-
-    // Creating a unique User ID, i.e. a combination of the User Address & the Wrapped Asset Address.
-    let userID = generateID(_userAddress, _wrappedTokenAddress);
-
-    // Retrieving the User w.r.t the Wrapped Asset
-    let userHoldings = await UserHoldings.get(userID);
-    if(userHoldings != undefined){
-      // Updating the Balance of User Address
-      let userTokenAmount = userHoldings.tokenAmount;
-      userHoldings.tokenAmount = userTokenAmount - _amount;
-      userHoldings.save();
-    }
-    derivative.save();
-  }
 }
