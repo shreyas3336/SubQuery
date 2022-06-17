@@ -9,6 +9,7 @@ runner:
     name: '@subql/query'
     version: '*'
 description: Controller Reverse Mapping testing
+
 repository: https://github.com/shreyas3336/SubQuery
 schema:
   file: ./schema.graphql

@@ -16,7 +16,7 @@
     "schema.graphql",
     "project.yaml"
   ],
-  "author": "Shreyas Agarwal",
+  "author": "Shreyas",
   "license": "GNU-GPL3",
   "dependencies": {
     "@acala-network/type-definitions": "^4.1.1",
