@@ -1,4 +1,4 @@
-import {Project, Derivative, UserHolding} from "../types";
+import {Project, Derivative, UserHolding } from "../types";
 import { AcalaEvmEvent, AcalaEvmCall } from '@subql/acala-evm-processor';
 import { BigNumber } from "ethers";
 
@@ -79,17 +79,17 @@ export async function handleCreateVest(event: AcalaEvmCall<CreateVest>): Promise
         let userHoldingsID = generateID(_userAddress, _wrappedTokenAddress);
 
         // Checking if the User already exists w.r.t the Wrapped Asset
-        let userHoldings = UserHolding.get(userHoldingsID);
+        let userHoldings = await UserHolding.get(userHoldingsID);
         if (userHoldings == null){
             // If the User doesn't exist, create one.
             userHoldings = new UserHolding(userHoldingsID);
-            userHoldings.tokenAmount = BigInt(0);
+            userHoldings.amount = BigInt(0);
             userHoldings.address = _userAddress;
             userHoldings.derivativeId = derivative.id.toString();
         }
         // Increase the Wrapped Asset Holdings of the User.
-        let userTokenAmount = userHoldings.tokenAmount;
-        userHoldings.tokenAmount = userTokenAmount.plus(_tokenAmount);
+        let userTokenAmount = userHoldings.amount;
+        userHoldings.amount = userTokenAmount + _tokenAmount;
         userHoldings.save();
         derivative.save();
     }
