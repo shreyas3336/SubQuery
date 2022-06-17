@@ -1,6 +1,6 @@
 specVersion: 1.0.0
-name: Inc
-version: 0.0.0
+name: Master
+version: 0.0.1
 runner:
   node:
     name: '@subql/node'
@@ -8,31 +8,37 @@ runner:
   query:
     name: '@subql/query'
     version: '*'
-description: A basic Acala EVM example
-repository: https://github.com/shreyas3336/SubQuery.git
+description: Master Subgraph
+repository: https://github.com/shreyas3336/SubQuery
 schema:
   file: ./schema.graphql
 network:
   chainId: '0x5c562e6300954998233c9a40b6b86f3028977e6d32d0da1af207738d19f98c1b'
-  endpoint: wss://mandala-tc7-rpcnode.aca-dev.network/ws
+  endpoint: >-
+    wss://acala-mandala.api.onfinality.io/ws?apikey=2267b431-9138-4602-8f50-a4ea1dcd3951
   chaintypes:
     file: ./dist/chaintypes.js
 dataSources:
   - kind: substrate/AcalaEvm
-    startBlock: 1332000
+    startBlock: 1332100
     processor:
       file: ./dist/acalaEvm.js
       options:
-        abi: erc20
-        address: '0x66362069f0185fe02c948307f1cceb9c356b8b77'
+        abi: master
+        address: '0xd1255fC0b0b95B0F7770F9f7e0210bee75eB61Ba'
     assets:
-      erc20:
-        file: ./abi/Inc.json
+      master:
+        file: ./abi/Master.json
     mapping:
       file: ./dist/index.js
       handlers:
-        - handler: handleIncrement
+        - handler: handleProjectInfo
           kind: substrate/AcalaEvmEvent
           filter:
             topics:
-              - Increment(address indexed initiator,uint value)
+              - ProjectInfo(string name,address indexed tokenAddress,string tokenTicker,string documentHash,address creator,uint256 tokenDecimal)
+        - handler: handleUpgraded
+          kind: substrate/AcalaEvmEvent
+          filter:
+            topics:
+              - Upgraded(address indexed implementation)
