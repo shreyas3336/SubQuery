@@ -1,11 +1,15 @@
-import {Implementation, Project, Derivative, UserHoldings} from "../types";
+import {Project, Derivative, UserHoldings} from "../types";
 import { AcalaEvmEvent, AcalaEvmCall } from '@subql/acala-evm-processor';
 import { BigNumber, logger } from "ethers"; 
 import { bool } from "@polkadot/types-codec";
 
 // Setup types from ABI
-type ProjectInfo = [string, string, string, string, string, BigNumber] & { name: string; tokenAddress: string; tokenTicker: string; documentHash: string; creator: string; tokenDecimal:BigNumber; };
-type Upgrade = [string] & { implementation: string; }
+type ProjectInfo = [string, string, string, BigNumber] & { 
+    tokenAddress: string; 
+    tokenTicker: string; 
+    creator: string; 
+    tokenDecimal:BigNumber; 
+};
 
 // Setup types from ABI
 type CreateVest = [string,string,string,BigNumber,BigNumber,string,string, Boolean] & {
@@ -35,10 +39,8 @@ function generateID(_user: string, _ticker: string): string {
   }
 
 export async function handleProjectInfo(event: AcalaEvmEvent<ProjectInfo>): Promise<void> {
-    let _projectName = event.args.name.toString();
-    let _projectTokenAddress = event.args.tokenAddress;
+    let _projectTokenAddress = event.args.tokenAddress.toString();
     let _projectTokenTicker = event.args.tokenTicker.toString();
-    let _projectDocHash = event.args.documentHash.toString();
     let _projectOwner = event.args.creator.toString();
     let _projectDecimal = event.args.tokenDecimal.toBigInt();
 
@@ -49,26 +51,11 @@ export async function handleProjectInfo(event: AcalaEvmEvent<ProjectInfo>): Prom
     if(project === undefined) {
         project = new Project(_projectID);
         project.projectOwnerAddress = _projectOwner;
-        project.projectName = _projectName;
         project.projectTokenAddress = _projectTokenAddress;
         project.projectTokenTicker = _projectTokenTicker;
-        project.projectDocHash = _projectDocHash;
         project.projectTokenDecimal = _projectDecimal;
     }
     project.save();
-}
-
-export async function handleUpgraded(event: AcalaEvmCall<Upgrade>): Promise<void> {
-    let _implementation = event.args.implementation.toString();
-
-    let upgrade = await Implementation.get(event.hash.toString());
-    logger.debug(upgrade);
-    if(upgrade === undefined) {
-        upgrade = new Implementation(event.hash.toString());
-        upgrade.newImplementationAddress = _implementation;
-        upgrade.timestamp = BigInt(event.timestamp);
-    }
-    upgrade.save();
 }
 
 export async function handleCreateVest(event: AcalaEvmCall<CreateVest>): Promise<void> {
