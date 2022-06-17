@@ -6,7 +6,7 @@ type Project @entity {
   projectTokenTicker: String!
   projectDocHash: String!
   projectTokenDecimal: BigInt!
-  derivatives: [Derivative!]! @derivedFrom(field: "projectID")
+  derivatives: [Derivative] @derivedFrom(field: "project")
 }
 
 type Implementation @entity {
@@ -20,13 +20,13 @@ type Derivative @entity {
   wrappedTokenTicker: String!
   unlockTime: BigInt!
   totalSupply: BigInt!
-  holders: [UserHoldings!]! @derivedFrom(field: "derivativeID")
-  projectID: Project!
+  holders: [UserHoldings] @derivedFrom(field: "derivative")
+  project: Project!
 }
 
 type UserHoldings @entity {
   id: ID!
   address: Bytes!
   tokenAmount: BigInt!
-  derivativeID: Derivative!
+  derivative: Derivative!
 }
