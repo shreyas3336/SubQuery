@@ -11,4 +11,12 @@ type Derivative @entity {
   wrappedTokenTicker: String!
   unlockTime: BigInt!
   totalSupply: BigInt!
+  project: Project
+}
+
+type UserHolding @entity {
+  id: ID!
+  address: String!
+  amount: BigInt!
+  derivative: Derivative
 }

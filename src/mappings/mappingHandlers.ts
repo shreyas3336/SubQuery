@@ -1,4 +1,4 @@
-import {Project, Derivative} from "../types";
+import {Project, Derivative, UserHolding} from "../types";
 import { AcalaEvmEvent, AcalaEvmCall } from '@subql/acala-evm-processor';
 import { BigNumber } from "ethers";
 
@@ -57,7 +57,7 @@ export async function handleCreateVest(event: AcalaEvmCall<CreateVest>): Promise
      // Generting a Unique Project ID, i.e. a combination of Project Creator & Project Address
     let _projectID = generateID(_projectCreator, _projectAddress);
     let project = await Project.get(_projectID);
-    logger.debug(project);
+    logger.debug("CreateVest | ProjectInfo --- ",project);
     if(project != undefined) {
         // If the project exists. Check the corresponding derivative asset exists or not.
         let derivative = await Derivative.get(_wrappedTokenAddress);
@@ -67,11 +67,30 @@ export async function handleCreateVest(event: AcalaEvmCall<CreateVest>): Promise
             derivative.wrappedTokenTicker = _wrappedTokenTicker;
             derivative.totalSupply = BigInt(0);
             derivative.unlockTime = _unlockTime;
+            derivative.projectId = project.id.toString();
             derivative.save();
         }
+        
         // Increase the Total Supply of the Derivative Asset.
         let derivativeSupply = derivative.totalSupply;
         derivative.totalSupply = derivativeSupply + _tokenAmount;
+
+        // Creating a unique User ID, i.e. a combination of the User Address & the Wrapped Asset Address.
+        let userHoldingsID = generateID(_userAddress, _wrappedTokenAddress);
+
+        // Checking if the User already exists w.r.t the Wrapped Asset
+        let userHoldings = UserHolding.get(userHoldingsID);
+        if (userHoldings == null){
+            // If the User doesn't exist, create one.
+            userHoldings = new UserHolding(userHoldingsID);
+            userHoldings.tokenAmount = BigInt(0);
+            userHoldings.address = _userAddress;
+            userHoldings.derivativeId = derivative.id.toString();
+        }
+        // Increase the Wrapped Asset Holdings of the User.
+        let userTokenAmount = userHoldings.tokenAmount;
+        userHoldings.tokenAmount = userTokenAmount.plus(_tokenAmount);
+        userHoldings.save();
         derivative.save();
     }
 }
