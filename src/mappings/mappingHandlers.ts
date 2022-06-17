@@ -93,7 +93,7 @@ export async function handleCreateVest(event: AcalaEvmCall<CreateVest>): Promise
             derivative = new Derivative(_wrappedTokenAddress);
             derivative.wrappedTokenTicker = _wrappedTokenTicker;
             derivative.totalSupply = BigInt(0);
-            derivative.projectIDId = project.id;
+            derivative.projectId = project.id.toString();
             derivative.unlockTime = _unlockTime;
             derivative.save();
         }
@@ -111,7 +111,7 @@ export async function handleCreateVest(event: AcalaEvmCall<CreateVest>): Promise
             userHoldings = new UserHoldings(userHoldingsID);
             userHoldings.tokenAmount = BigInt(0);
             userHoldings.address = _userAddress;
-            userHoldings.derivativeIDId = derivative.id;
+            userHoldings.derivativeId = derivative.id.toString();
           }
           // Increase the Wrapped Asset Holdings of the User.
           let userTokenAmount = userHoldings.tokenAmount;
@@ -129,7 +129,7 @@ export async function handleTransferWrapped(event: AcalaEvmCall<TransferWrapped>
   let _transferAmount = event.args.amount.toBigInt();
 
   // Check the corresponding derivative asset exists or not.
-  if (_receiverAddress != "0x30B9A8279298Ba8d37Bf76b9f2A805D656fC1C07"){
+  if (_receiverAddress.toLocaleLowerCase() != "0x9C27C76239E69555103C43AFD87C41628E8f8a14".toLocaleLowerCase()){
     let derivative = await Derivative.get(_wrappedTokenAddress);
     if(derivative != undefined){
       // Creating a unique User ID, i.e. a combination of the User Address & the Wrapped Asset Address.
@@ -153,7 +153,7 @@ export async function handleTransferWrapped(event: AcalaEvmCall<TransferWrapped>
           receiverUserHoldings = new UserHoldings(receiverID);
           receiverUserHoldings.address = _receiverAddress;
           receiverUserHoldings.tokenAmount = BigInt(0);
-          receiverUserHoldings.derivativeIDId = derivative.id;
+          receiverUserHoldings.derivativeId = derivative.id.toString();
         }
 
         // Updating the Balance of Receiver Address
