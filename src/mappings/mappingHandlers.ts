@@ -1,6 +1,6 @@
 import {Implementation, Project} from "../types";
 import { AcalaEvmEvent, AcalaEvmCall } from '@subql/acala-evm-processor';
-import { BigNumber } from "ethers";
+import { BigNumber, logger } from "ethers"; 
 
 // Setup types from ABI
 type ProjectInfo = [string, string, string, string, string, BigNumber] & { name: string; tokenAddress: string; tokenTicker: string; documentHash: string; creator: string; tokenDecimal:BigNumber; };
@@ -21,6 +21,7 @@ export async function handleProjectInfo(event: AcalaEvmEvent<ProjectInfo>): Prom
     let _projectID = generateID(_projectOwner,_projectTokenAddress);
 
     let project = await Project.get(_projectID);
+    logger.debug(project);
     if(project === undefined) {
         project = new Project(_projectID);
         project.projectOwnerAddress = _projectOwner;
@@ -30,17 +31,18 @@ export async function handleProjectInfo(event: AcalaEvmEvent<ProjectInfo>): Prom
         project.projectDocHash = _projectDocHash;
         project.projectTokenDecimal = _projectDecimal;
     }
-    await project.save();
+    project.save();
 }
 
 export async function handleUpgraded(event: AcalaEvmCall<Upgrade>): Promise<void> {
     let _implementation = event.args.implementation.toString();
 
     let upgrade = await Implementation.get(event.hash.toString());
+    logger.debug(upgrade);
     if(upgrade === undefined) {
         upgrade = new Implementation(event.hash.toString());
         upgrade.newImplementationAddress = _implementation;
         upgrade.timestamp = BigInt(event.timestamp);
     }
-    await upgrade.save();
+    upgrade.save();
 }
