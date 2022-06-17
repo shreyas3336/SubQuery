@@ -19,7 +19,7 @@ network:
     file: ./dist/chaintypes.js
 dataSources:
   - kind: substrate/AcalaEvm
-    startBlock: 1332168
+    startBlock: 1332000
     processor:
       file: ./dist/acalaEvm.js
       options:
@@ -35,5 +35,4 @@ dataSources:
           kind: substrate/AcalaEvmEvent
           filter:
             topics:
-              - Increment(address indexed initiator, uint value)
-              - CapxIncrement(address indexed initiator, uint value)
+              - Increment(address indexed initiator,uint value)

@@ -3,4 +3,6 @@ type Increment @entity {
   id: ID! # Transaction hash
 
   value: BigInt!
+
+  initiator: String!
 }
