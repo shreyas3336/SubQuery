@@ -3,7 +3,7 @@ import { AcalaEvmEvent, AcalaEvmCall } from '@subql/acala-evm-processor';
 import { BigNumber } from "ethers";
 
 // Setup types from ABI
-type ProjectInfo = [string, string, string, string, string, BigNumber] & { name: string; tokenAddress: string; tokenTicker: string; documentHash: string; creator: string; tokenDecimal:BigNumber };
+type ProjectInfo = [string, string, string, string, string, BigNumber] & { name: string; tokenAddress: string; tokenTicker: string; documentHash: string; creator: string; tokenDecimal:BigNumber; };
 type Upgrade = [string] & { implementation: string; }
 
 function generateID(_user: string, _ticker: string): string {
