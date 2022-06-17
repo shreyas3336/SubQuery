@@ -1,7 +1,7 @@
 {
-  "name": "Inc",
-  "version": "0.0.0",
-  "description": "A basic Acala EVM example",
+  "name": "Controller",
+  "version": "0.0.1",
+  "description": "Controller Reverse Mapping testing",
   "main": "dist/index.js",
   "scripts": {
     "build": "subql build",
@@ -31,8 +31,5 @@
   "exports": {
     "acalaEvm": "./node_modules/@subql/acala-evm-processor/dist/index.js",
     "chaintypes": "./src/chaintypes.ts"
-  },
-  "resolutions": {
-    "ipfs-unixfs": "6.0.6"
   }
 }

@@ -1,8 +1,14 @@
-type Increment @entity {
+type Project @entity {
+  id: ID!
+  projectOwnerAddress: Bytes! 
+  projectTokenAddress: Bytes!
+  projectTokenTicker: String!
+  projectTokenDecimal: BigInt!
+}
 
-  id: ID! # Transaction hash
-
-  value: BigInt!
-
-  initiator: String!
+type Derivative @entity {
+  id: ID!
+  wrappedTokenTicker: String!
+  unlockTime: BigInt!
+  totalSupply: BigInt!
 }
