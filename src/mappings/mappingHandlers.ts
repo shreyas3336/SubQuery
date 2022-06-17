@@ -1,14 +1,13 @@
 import {Project, Derivative, UserHoldings} from "../types";
 import { AcalaEvmEvent, AcalaEvmCall } from '@subql/acala-evm-processor';
 import { BigNumber, logger } from "ethers"; 
-import { bool } from "@polkadot/types-codec";
 
 // Setup types from ABI
 type ProjectInfo = [string, string, string, BigNumber] & { 
     tokenAddress: string; 
     tokenTicker: string; 
     creator: string; 
-    tokenDecimal:BigNumber; 
+    tokenDecimal: BigNumber; 
 };
 
 // Setup types from ABI
