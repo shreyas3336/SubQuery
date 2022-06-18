@@ -45,14 +45,14 @@ export async function handleProjectInfo(event: AcalaEvmEvent<ProjectInfo>): Prom
 
     let project = await Project.get(_projectID);
     logger.debug("ProjectInfo --- ",project);
-    if(project === undefined) {
+    if(!project) {
         project = new Project(_projectID);
         project.projectOwnerAddress = _projectOwner;
         project.projectTokenAddress = _projectTokenAddress;
         project.projectTokenTicker = _projectTokenTicker;
         project.projectTokenDecimal = _projectDecimal;
     }
-    project.save();
+    await project.save();
 }
 
 export async function handleCreateVest(event: AcalaEvmCall<CreateVest>): Promise<void> {
@@ -69,17 +69,17 @@ export async function handleCreateVest(event: AcalaEvmCall<CreateVest>): Promise
     let _projectID = generateID(_projectCreator, _projectAddress);
     let project = await Project.get(_projectID);
     logger.debug("CreateVest | ProjectInfo --- ",project);
-    if(project != undefined) {
+    if(project) {
         // If the project exists. Check the corresponding derivative asset exists or not.
         let derivative = await Derivative.get(_wrappedTokenAddress);
-        if(derivative === undefined) {
+        if(!derivative) {
             // If the derivative asset doesn't exist, create one.
             derivative = new Derivative(_wrappedTokenAddress);
             derivative.wrappedTokenTicker = _wrappedTokenTicker;
             derivative.totalSupply = BigInt(0);
             derivative.unlockTime = _unlockTime;
             derivative.projectId = project.id.toString();
-            derivative.save();
+            await derivative.save();
         }
         
         // Increase the Total Supply of the Derivative Asset.
@@ -91,7 +91,7 @@ export async function handleCreateVest(event: AcalaEvmCall<CreateVest>): Promise
 
         // Checking if the User already exists w.r.t the Wrapped Asset
         let userHoldings = await UserHolding.get(userHoldingsID);
-        if (userHoldings == null){
+        if (!userHoldings){
             // If the User doesn't exist, create one.
             userHoldings = new UserHolding(userHoldingsID);
             userHoldings.amount = BigInt(0);
@@ -101,8 +101,8 @@ export async function handleCreateVest(event: AcalaEvmCall<CreateVest>): Promise
         // Increase the Wrapped Asset Holdings of the User.
         let userTokenAmount = userHoldings.amount;
         userHoldings.amount = userTokenAmount + _tokenAmount;
-        userHoldings.save();
-        derivative.save();
+        await userHoldings.save();
+        await derivative.save();
     }
 }
 
@@ -116,24 +116,24 @@ export async function handleTransferWrapped(event: AcalaEvmCall<TransferWrapped>
   // Check the corresponding derivative asset exists or not.
   if (_receiverAddress.toLocaleLowerCase() != "0x9C27C76239E69555103C43AFD87C41628E8f8a14".toLocaleLowerCase()){
     let derivative = await Derivative.get(_wrappedTokenAddress);
-    if(derivative != undefined){
+    if(derivative){
       // Creating a unique User ID, i.e. a combination of the User Address & the Wrapped Asset Address.
       let senderID = generateID(_userAddress, _wrappedTokenAddress);
 
       // Retrieving the User w.r.t the Wrapped Asset
       let senderUserHoldings = await UserHolding.get(senderID);
-      if(senderUserHoldings != undefined){
+      if(senderUserHoldings){
         // Updating the Balance of Sender Address
         let senderTokenAmount = senderUserHoldings.amount;
         senderUserHoldings.amount = senderTokenAmount - _transferAmount;
-        senderUserHoldings.save();
+        await senderUserHoldings.save();
 
         // Creating a unique User ID, i.e. a combination of the User Address & the Wrapped Asset Address.
         let receiverID = generateID(_receiverAddress, _wrappedTokenAddress);
 
         // Checking if the User already exists w.r.t the Wrapped Asset
         let receiverUserHoldings = await UserHolding.get(receiverID);
-        if (receiverUserHoldings === undefined){
+        if (!receiverUserHoldings){
           // If the User doesn't exist, create one.
           receiverUserHoldings = new UserHolding(receiverID);
           receiverUserHoldings.address = _receiverAddress;
@@ -144,9 +144,9 @@ export async function handleTransferWrapped(event: AcalaEvmCall<TransferWrapped>
         // Updating the Balance of Receiver Address
         let receiverTokenAmount = receiverUserHoldings.amount;
         receiverUserHoldings.amount = receiverTokenAmount + _transferAmount;
-        receiverUserHoldings.save();
+        await receiverUserHoldings.save();
       }
-      derivative.save();
+      await derivative.save();
     }
   }
 }
@@ -159,7 +159,7 @@ export async function handleWithdraw(event: AcalaEvmCall<WithdrawController>): P
 
   // Loading the Derivative Asset.
   let derivative = await Derivative.get(_wrappedTokenAddress);
-  if(derivative != undefined){
+  if(derivative){
     // Decreasing the Total Supply of the Derivative Asset.
     let derivativeTotalSupply = derivative.totalSupply;
     derivative.totalSupply = derivativeTotalSupply - _amount;
@@ -169,12 +169,12 @@ export async function handleWithdraw(event: AcalaEvmCall<WithdrawController>): P
 
     // Retrieving the User w.r.t the Wrapped Asset
     let userHoldings = await UserHolding.get(userID);
-    if(userHoldings != undefined){
+    if(userHoldings){
       // Updating the Balance of User Address
       let userTokenAmount = userHoldings.amount;
       userHoldings.amount = userTokenAmount - _amount;
-      userHoldings.save();
+      await userHoldings.save();
     }
-    derivative.save();
+    await derivative.save();
   }
 }
