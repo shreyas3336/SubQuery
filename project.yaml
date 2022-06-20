@@ -22,14 +22,14 @@ network:
 dataSources:
   - kind: substrate/AcalaEvm
     startBlock: 1332000
-    processor:
-      file: ./dist/acalaEvm.js
-      options:
-        abi: controller
-        address: '0x9C27C76239E69555103C43AFD87C41628E8f8a14'
-    assets:
-      controller:
-        file: ./abi/Controller.json
+    # processor:
+    #   file: ./dist/acalaEvm.js
+    #   options:
+    #     abi: controller
+    #     address: '0x9C27C76239E69555103C43AFD87C41628E8f8a14'
+    # assets:
+    #   controller:
+    #     file: ./abi/Controller.json
     mapping:
       file: ./dist/index.js
       handlers:
