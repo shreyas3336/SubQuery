@@ -70,7 +70,7 @@
         "type": "bool"
       }
     ],
-    "name": "CreateVest",
+    "name": "CreateVestController",
     "type": "event"
   },
   {
@@ -101,10 +101,9 @@
         "type": "uint256"
       }
     ],
-    "name": "TransferWrapped",
+    "name": "TransferWrappedController",
     "type": "event"
-  }
-  ,
+  },
   {
     "anonymous": false,
     "inputs": [
@@ -127,7 +126,7 @@
         "type": "address"
       }
     ],
-    "name": "Withdraw",
+    "name": "WithdrawController",
     "type": "event"
   },
   {
@@ -240,6 +239,34 @@
   },
   {
     "inputs": [],
+    "name": "futureFactory",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "futureProposal",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
     "name": "liquidController",
     "outputs": [
       {
@@ -282,6 +309,34 @@
   },
   {
     "inputs": [],
+    "name": "newFactoryDeadline",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "newProposalDeadline",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
     "name": "owner",
     "outputs": [
       {
@@ -300,86 +355,6 @@
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "tokenAddress",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "tokenAmount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "tokenTime",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "tokenTransferable",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
   },
   {
     "inputs": [
@@ -477,11 +452,65 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_proposal",
+        "name": "_controller",
         "type": "address"
       }
     ],
-    "name": "setLiquidProposal",
+    "name": "setVestingController",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_newFactory",
+        "type": "address"
+      }
+    ],
+    "name": "commitTransferFactory",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "applyTransferFactory",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "revertFactoryTransfer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_newProposal",
+        "type": "address"
+      }
+    ],
+    "name": "commitTransferProposal",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "applyTransferProposal",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "revertProposalTransfer",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -513,19 +542,6 @@
     "stateMutability": "view",
     "type": "function",
     "constant": true
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_controller",
-        "type": "address"
-      }
-    ],
-    "name": "setVestingController",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
   },
   {
     "inputs": [
@@ -603,7 +619,7 @@
         "type": "uint256"
       }
     ],
-    "name": "withdrawToken",
+    "name": "withdrawWrappedVestingToken",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
