@@ -1,10 +1,11 @@
-import {Implementation, Project} from "../types";
+import {Implementation, Project, Transfer} from "../types";
 import { AcalaEvmEvent, AcalaEvmCall } from '@subql/acala-evm-processor';
 import { BigNumber, logger } from "ethers"; 
 
 // Setup types from ABI
 type ProjectInfo = [string, string, string, string, string, BigNumber] & { name: string; tokenAddress: string; tokenTicker: string; documentHash: string; creator: string; tokenDecimal:BigNumber; };
-type Upgrade = [string] & { implementation: string; }
+type Upgrade = [string] & { implementation: string; };
+type TransferWrapped = [string, string, BigNumber] & {_from: string; _to: string; _amount:BigNumber};
 
 function generateID(_user: string, _ticker: string): string {
     return _user.concat("-LOCK-").concat(_ticker);
@@ -39,10 +40,21 @@ export async function handleUpgraded(event: AcalaEvmCall<Upgrade>): Promise<void
 
     let upgrade = await Implementation.get(event.hash.toString());
     logger.debug(upgrade);
-    if(upgrade === undefined) {
+    if(!upgrade) {
         upgrade = new Implementation(event.hash.toString());
         upgrade.newImplementationAddress = _implementation;
         upgrade.timestamp = BigInt(event.timestamp);
     }
     upgrade.save();
+}
+
+export async function handleAcalaEvmCall(event: AcalaEvmCall<TransferWrapped>): Promise<void> {
+    const approval = new Transfer(event.hash);
+
+    approval.token = event.from;
+    approval.amount = event.args._amount.toBigInt();
+    approval.from = event.args._from;
+    approval.to = event.args._to;
+
+    await approval.save();
 }

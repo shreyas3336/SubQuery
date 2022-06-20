@@ -1,8 +1,8 @@
 type Project @entity {
   id: ID!
-  projectOwnerAddress: Bytes! 
+  projectOwnerAddress: String! 
   projectName: String!
-  projectTokenAddress: Bytes!
+  projectTokenAddress: String!
   projectTokenTicker: String!
   projectDocHash: String!
   projectTokenDecimal: BigInt!
@@ -12,4 +12,12 @@ type Implementation @entity {
   id: ID!
   newImplementationAddress: String!
   timestamp: BigInt!
+}
+
+type Transfer @entity {
+  id: ID!
+  from: String!
+  to: String!
+  token: String!
+  amount: BigInt!
 }

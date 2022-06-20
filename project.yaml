@@ -25,7 +25,7 @@ dataSources:
       file: ./dist/acalaEvm.js
       options:
         abi: master
-        address: '0xd1255fC0b0b95B0F7770F9f7e0210bee75eB61Ba'
+        address: '0x69a6A5dBBc0afeC6B29D35B6AD1F23a334ef6a4d'
     assets:
       master:
         file: ./abi/Master.json
@@ -42,3 +42,21 @@ dataSources:
           filter:
             topics:
               - Upgraded(address indexed implementation)
+  - kind: substrate/AcalaEvm
+    startBlock: 1359000
+    processor:
+      file: ./dist/acalaEvm.js
+      options:
+        abi: controller
+        address: "0xC5DB2D44362a96E195A1215361Ef14c9060f0234"
+    assets:
+      controller:
+        file: ./abi/Controller.json
+    mapping:
+      file: ./dist/index.js
+      handlers:
+        - handler: handleTransferWrappedCall
+          kind: substrate/AcalaEvmCall
+          filter:
+            function: tokenTransfer(address _from,address _to,uint256 _amount)
+            from: "0xC5DB2D44362a96E195A1215361Ef14c9060f0234"
