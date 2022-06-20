@@ -20,7 +20,7 @@ network:
     file: ./dist/chaintypes.js
 dataSources:
   - kind: substrate/AcalaEvm
-    startBlock: 1330000
+    startBlock: 1359500
     processor:
       file: ./dist/acalaEvm.js
       options:
@@ -43,7 +43,7 @@ dataSources:
             topics:
               - Upgraded(address indexed implementation)
   - kind: substrate/AcalaEvm
-    startBlock: 1359000
+    startBlock: 1359500
     processor:
       file: ./dist/acalaEvm.js
       options:
