@@ -21,12 +21,12 @@ network:
     file: ./dist/chaintypes.js
 dataSources:
   - kind: substrate/AcalaEvm
-    startBlock: 1359500
+    startBlock: 1361548
     processor:
       file: ./dist/acalaEvm.js
       options:
         abi: controller
-        address: '0x69a6A5dBBc0afeC6B29D35B6AD1F23a334ef6a4d'
+        address: '0x3A4b355831529FE7a564f9c829CB689ac581156A'
     assets:
       controller:
         file: ./abi/Master.json
