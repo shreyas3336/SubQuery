@@ -44,11 +44,6 @@ dataSources:
               - Upgraded(address indexed implementation)
   - kind: substrate/AcalaEvm
     startBlock: 1359500
-    processor:
-      file: ./dist/acalaEvm.js
-    assets:
-      controller:
-        file: ./abi/Controller.json
     mapping:
       file: ./dist/index.js
       handlers:
