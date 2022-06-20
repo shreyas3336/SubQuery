@@ -22,14 +22,14 @@ network:
 dataSources:
   - kind: substrate/AcalaEvm
     startBlock: 1332000
-    # processor:
-    #   file: ./dist/acalaEvm.js
-    #   options:
-    #     abi: controller
-    #     address: '0x9C27C76239E69555103C43AFD87C41628E8f8a14'
-    # assets:
-    #   controller:
-    #     file: ./abi/Controller.json
+    processor:
+      file: ./dist/acalaEvm.js
+      options:
+        abi: controller
+        address: '0xd1255fC0b0b95B0F7770F9f7e0210bee75eB61Ba'
+    assets:
+      controller:
+        file: ./abi/Master.json
     mapping:
       file: ./dist/index.js
       handlers:
@@ -37,7 +37,7 @@ dataSources:
           kind: substrate/AcalaEvmEvent
           filter:
             topics:
-              - ProjectInfo(address indexed tokenAddress,string tokenTicker,address creator,uint256 tokenDecimal)
+              - ProjectInfo(string name,address indexed tokenAddress,string tokenTicker,string documentHash,address creator,uint256 tokenDecimal)
         - handler: handleCreateVest
           kind: substrate/AcalaEvmEvent
           filter:
