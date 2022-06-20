@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: Controller
+name: Master
 version: 0.0.1
 runner:
   node:
@@ -8,8 +8,7 @@ runner:
   query:
     name: '@subql/query'
     version: '*'
-description: Controller Reverse Mapping testing
-
+description: Master Subgraph
 repository: https://github.com/shreyas3336/SubQuery
 schema:
   file: ./schema.graphql
@@ -21,14 +20,14 @@ network:
     file: ./dist/chaintypes.js
 dataSources:
   - kind: substrate/AcalaEvm
-    startBlock: 1359500
+    startBlock: 1330000
     processor:
       file: ./dist/acalaEvm.js
       options:
-        abi: controller
+        abi: master
         address: '0x69a6A5dBBc0afeC6B29D35B6AD1F23a334ef6a4d'
     assets:
-      controller:
+      master:
         file: ./abi/Master.json
     mapping:
       file: ./dist/index.js
@@ -38,18 +37,26 @@ dataSources:
           filter:
             topics:
               - ProjectInfo(string name,address indexed tokenAddress,string tokenTicker,string documentHash,address creator,uint256 tokenDecimal)
-        - handler: handleCreateVest
+        - handler: handleUpgraded
           kind: substrate/AcalaEvmEvent
           filter:
             topics:
-              - CreateVestController(address indexed assetAddress,address creator,address userAddress,uint256 userAmount,uint256 unlockTime,address wrappedERC20Address,string wrappedAssetTicker,bool transferable)
-        - handler: handleTransferWrapped
-          kind: substrate/AcalaEvmEvent
+              - Upgraded(address indexed implementation)
+  - kind: substrate/AcalaEvm
+    startBlock: 1359000
+    processor:
+      file: ./dist/acalaEvm.js
+      options:
+        abi: controller
+        address: "0xC5DB2D44362a96E195A1215361Ef14c9060f0234"
+    assets:
+      controller:
+        file: ./abi/Controller.json
+    mapping:
+      file: ./dist/index.js
+      handlers:
+        - handler: handleTransferWrappedCall
+          kind: substrate/AcalaEvmCall
           filter:
-            topics:
-                - TransferWrappedController(address userAddress,address indexed wrappedTokenAddress,address receiverAddress,uint256 amount)
-        - handler: handleWithdraw
-          kind: substrate/AcalaEvmEvent
-          filter:
-            topics:
-                - WithdrawController(address indexed userAddress,uint256 amount,address wrappedTokenAddress)
+            function: tokenTransfer(address _from,address _to,uint256 _amount)
+            from: "0xC5DB2D44362a96E195A1215361Ef14c9060f0234"
