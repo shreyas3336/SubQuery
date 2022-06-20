@@ -5,7 +5,7 @@ import { BigNumber, logger } from "ethers";
 // Setup types from ABI
 type ProjectInfo = [string, string, string, string, string, BigNumber] & { name: string; tokenAddress: string; tokenTicker: string; documentHash: string; creator: string; tokenDecimal:BigNumber; };
 type Upgrade = [string] & { implementation: string; };
-type TransferWrapped = [string, string, BigNumber] & {_from: string; _to: string; _amount:BigNumber};
+type TransferWrapped = [string, string, BigNumber] & {from: string; to: string; value:BigNumber};
 
 function generateID(_user: string, _ticker: string): string {
     return _user.concat("-LOCK-").concat(_ticker);
@@ -49,12 +49,12 @@ export async function handleUpgraded(event: AcalaEvmCall<Upgrade>): Promise<void
 }
 
 export async function handleAcalaEvmCall(event: AcalaEvmCall<TransferWrapped>): Promise<void> {
-    const approval = new Transfer(event.hash);
-
-    approval.token = event.from;
-    approval.amount = event.args._amount.toBigInt();
-    approval.from = event.args._from;
-    approval.to = event.args._to;
-
-    await approval.save();
+    if(event.from.toLowerCase() === "0xd93896F15bb793F88c1ae50610bFBA209621dBD1".toLowerCase()){
+        const approval = new Transfer(event.hash);
+        approval.token = event.from;
+        approval.amount = event.args.value.toBigInt();
+        approval.from = event.args.from;
+        approval.to = event.args.to;
+        await approval.save();
+    }
 }

@@ -46,17 +46,15 @@ dataSources:
     startBlock: 1359500
     processor:
       file: ./dist/acalaEvm.js
-      options:
-        abi: controller
-        address: "0xC5DB2D44362a96E195A1215361Ef14c9060f0234"
     assets:
       controller:
         file: ./abi/Controller.json
     mapping:
       file: ./dist/index.js
       handlers:
-        - handler: handleTransferWrappedCall
-          kind: substrate/AcalaEvmCall
+        - handler: handleAcalaEvmEvent
+          kind: substrate/AcalaEvmEvent
           filter:
-            function: tokenTransfer(address _from,address _to,uint256 _amount)
-            from: "0xC5DB2D44362a96E195A1215361Ef14c9060f0234"
+            topics:
+              - Transfer(address indexed from,address indexed to,uint256 value)
+            
