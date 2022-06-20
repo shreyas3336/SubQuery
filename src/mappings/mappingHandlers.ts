@@ -36,7 +36,7 @@ export async function handleProjectInfo(event: AcalaEvmEvent<ProjectInfo>): Prom
 }
 
 export async function handleUpgraded(event: AcalaEvmCall<Upgrade>): Promise<void> {
-    let _implementation = event.args.implementation.toString();
+    let _implementation = event.args[0];
 
     let upgrade = await Implementation.get(event.hash.toString());
     logger.debug(upgrade);
