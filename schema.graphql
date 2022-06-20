@@ -1,23 +1,26 @@
 type Project @entity {
   id: ID!
-  projectOwnerAddress: String! 
+  projectOwnerAddress: Bytes! 
   projectName: String!
-  projectTokenAddress: String!
+  projectTokenAddress: Bytes!
   projectTokenTicker: String!
   projectDocHash: String!
   projectTokenDecimal: BigInt!
+  derivative: [Derivative] @derivedFrom(field: "project")
 }
 
-type Implementation @entity {
+type Derivative @entity {
   id: ID!
-  newImplementationAddress: String!
-  blockNumber: BigInt!
+  wrappedTokenTicker: String!
+  unlockTime: BigInt!
+  totalSupply: BigInt!
+  project: Project
+  holder: [UserHolding] @derivedFrom(field: "derivative")
 }
 
-type Transfer @entity {
+type UserHolding @entity {
   id: ID!
-  from: String!
-  to: String!
-  token: String!
+  address: String!
   amount: BigInt!
+  derivative: Derivative
 }
