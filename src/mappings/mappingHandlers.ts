@@ -38,10 +38,10 @@ export async function handleProjectInfo(event: AcalaEvmEvent<ProjectInfo>): Prom
 export async function handleUpgraded(event: AcalaEvmCall<Upgrade>): Promise<void> {
     let _implementation = event.args[0];
 
-    let upgrade = await Implementation.get(event.hash.toString());
+    let upgrade = await Implementation.get(event.blockHash.toString());
     logger.debug(upgrade);
     if(!upgrade) {
-        upgrade = new Implementation(event.hash.toString());
+        upgrade = new Implementation(event.blockHash.toString());
         upgrade.newImplementationAddress = _implementation;
         upgrade.timestamp = BigInt(event.timestamp);
     }
