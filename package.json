@@ -1,7 +1,7 @@
 {
-  "name": "Master",
+  "name": "Controller",
   "version": "0.0.1",
-  "description": "Controller Subgraph",
+  "description": "Controller Reverse Mapping testing",
   "main": "dist/index.js",
   "scripts": {
     "build": "subql build",
