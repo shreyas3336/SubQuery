@@ -35,7 +35,7 @@ export async function handleProjectInfo(event: AcalaEvmEvent<ProjectInfo>): Prom
     project.save();
 }
 
-export async function handleUpgraded(event: AcalaEvmCall<Upgrade>): Promise<void> {
+export async function handleUpgraded(event: AcalaEvmEvent<Upgrade>): Promise<void> {
     let _implementation = event.args[0];
 
     let upgrade = await Implementation.get(event.blockHash.toString());
@@ -48,10 +48,10 @@ export async function handleUpgraded(event: AcalaEvmCall<Upgrade>): Promise<void
     upgrade.save();
 }
 
-export async function handleAcalaEvmCall(event: AcalaEvmCall<TransferWrapped>): Promise<void> {
-    if(event.from.toLowerCase() === "0xd93896F15bb793F88c1ae50610bFBA209621dBD1".toLowerCase()){
-        const approval = new Transfer(event.hash);
-        approval.token = event.from;
+export async function handleAcalaEvmEvent(event: AcalaEvmEvent<TransferWrapped>): Promise<void> {
+    if(event.address.toLowerCase() === "0xd93896F15bb793F88c1ae50610bFBA209621dBD1".toLowerCase()){
+        const approval = new Transfer(event.transactionHash.toString());
+        approval.token = event.address;
         approval.amount = event.args.value.toBigInt();
         approval.from = event.args.from;
         approval.to = event.args.to;
