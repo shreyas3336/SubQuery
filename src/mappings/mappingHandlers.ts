@@ -3,11 +3,19 @@ import { AcalaEvmEvent, AcalaEvmCall } from '@subql/acala-evm-processor';
 import { BigNumber } from "ethers";
 
 // Setup types from ABI
-type ProjectInfo = [string, string, string, BigNumber] & { 
+// type ProjectInfo = [string, string, string, BigNumber] & { 
+//     tokenAddress: string; 
+//     tokenTicker: string; 
+//     creator: string; 
+//     tokenDecimal: BigNumber; 
+// };
+type ProjectInfo = [string, string, string, string, string, BigNumber] & { 
+    name: string; 
     tokenAddress: string; 
     tokenTicker: string; 
+    documentHash: string; 
     creator: string; 
-    tokenDecimal: BigNumber; 
+    tokenDecimal:BigNumber; 
 };
 type CreateVest = [string,string,string,BigNumber,BigNumber,string,string, Boolean] & {
     assetAddress: string;
@@ -35,24 +43,47 @@ function generateID(_user: string, _ticker: string): string {
     return _user.concat("-LOCK-").concat(_ticker);
   }
 
+// export async function handleProjectInfo(event: AcalaEvmEvent<ProjectInfo>): Promise<void> {
+//     let _projectTokenAddress = event.args.tokenAddress.toString();
+//     let _projectTokenTicker = event.args.tokenTicker.toString();
+//     let _projectOwner = event.args.creator.toString();
+//     let _projectDecimal = event.args.tokenDecimal.toBigInt();
+
+//     let _projectID = generateID(_projectOwner,_projectTokenAddress);
+
+//     let project = await Project.get(_projectID);
+//     logger.debug("ProjectInfo --- ",project);
+//     if(!project) {
+//         project = new Project(_projectID);
+//         project.projectOwnerAddress = _projectOwner;
+//         project.projectTokenAddress = _projectTokenAddress;
+//         project.projectTokenTicker = _projectTokenTicker;
+//         project.projectTokenDecimal = _projectDecimal;
+//     }
+//     await project.save();
+// }
 export async function handleProjectInfo(event: AcalaEvmEvent<ProjectInfo>): Promise<void> {
+    let _projectName = event.args.name.toString();
     let _projectTokenAddress = event.args.tokenAddress.toString();
     let _projectTokenTicker = event.args.tokenTicker.toString();
+    let _projectDocHash = event.args.documentHash.toString();
     let _projectOwner = event.args.creator.toString();
     let _projectDecimal = event.args.tokenDecimal.toBigInt();
 
     let _projectID = generateID(_projectOwner,_projectTokenAddress);
 
     let project = await Project.get(_projectID);
-    logger.debug("ProjectInfo --- ",project);
-    if(!project) {
+    logger.debug(project);
+    if(project === undefined) {
         project = new Project(_projectID);
         project.projectOwnerAddress = _projectOwner;
+        project.projectName = _projectName;
         project.projectTokenAddress = _projectTokenAddress;
         project.projectTokenTicker = _projectTokenTicker;
+        project.projectDocHash = _projectDocHash;
         project.projectTokenDecimal = _projectDecimal;
     }
-    await project.save();
+    project.save();
 }
 
 export async function handleCreateVest(event: AcalaEvmCall<CreateVest>): Promise<void> {
