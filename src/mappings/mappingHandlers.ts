@@ -43,7 +43,7 @@ export async function handleUpgraded(event: AcalaEvmCall<Upgrade>): Promise<void
     if(!upgrade) {
         upgrade = new Implementation(event.blockHash.toString());
         upgrade.newImplementationAddress = _implementation;
-        upgrade.timestamp = BigInt(event.timestamp);
+        upgrade.blockNumber = BigInt(event.blockNumber);
     }
     upgrade.save();
 }

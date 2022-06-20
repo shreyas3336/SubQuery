@@ -11,7 +11,7 @@ type Project @entity {
 type Implementation @entity {
   id: ID!
   newImplementationAddress: String!
-  timestamp: BigInt!
+  blockNumber: BigInt!
 }
 
 type Transfer @entity {
