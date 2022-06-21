@@ -43,13 +43,18 @@ dataSources:
           filter:
             topics:
               - CreateVestController(address indexed assetAddress,address creator,address userAddress,uint256 userAmount,uint256 unlockTime,address wrappedERC20Address,string wrappedAssetTicker,bool transferable)
-        - handler: handleTransferWrapped
-          kind: substrate/AcalaEvmEvent
-          filter:
-            topics:
-                - TransferWrappedController(address userAddress,address indexed wrappedTokenAddress,address receiverAddress,uint256 amount)
         - handler: handleWithdraw
           kind: substrate/AcalaEvmEvent
           filter:
             topics:
                 - WithdrawController(address indexed userAddress,uint256 amount,address wrappedTokenAddress)
+        - handler: handleCreateVestLock
+          kind: substrate/AcalaEvmEvent
+          filter:
+            topics:
+              - CreateVestVesting(uint256 vestID,address indexed assetAddress,address creator,address userAddress,uint256 userAmount,uint256 unlockTime)
+        - handler: handleWithdrawLock
+          kind: substrate/AcalaEvmEvent
+          filter:
+            topics:
+              - WithdrawVesting(uint256 vestID,address indexed userAddress,uint256 amount,address wrappedTokenAddress,uint256 unlockTime)
