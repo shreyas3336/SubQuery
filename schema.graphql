@@ -1,8 +1,8 @@
 type Project @entity {
   id: ID!
-  projectOwnerAddress: Bytes! 
+  projectOwnerAddress: String! 
   projectName: String!
-  projectTokenAddress: Bytes!
+  projectTokenAddress: String!
   projectTokenTicker: String!
   projectDocHash: String!
   projectTokenDecimal: BigInt!
