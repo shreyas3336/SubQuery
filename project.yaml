@@ -47,7 +47,7 @@ dataSources:
           kind: substrate/AcalaEvmEvent
           filter:
             topics:
-                - WithdrawController(address indexed userAddress,uint256 amount,address wrappedTokenAddress)
+              - WithdrawController(address indexed userAddress,uint256 amount,address wrappedTokenAddress)
         - handler: handleCreateVestLock
           kind: substrate/AcalaEvmEvent
           filter:
