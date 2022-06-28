@@ -1,36 +1,25 @@
-type Project @entity {
+type TokenDeployed @entity {
   id: ID!
-  projectOwnerAddress: String! 
-  projectName: String!
-  projectTokenAddress: String!
-  projectTokenTicker: String!
-  projectDocHash: String!
-  projectTokenDecimal: BigInt!
-  derivative: [Derivative] @derivedFrom(field: "project")
-  lock: [Lock] @derivedFrom(field: "project")
+  typeOfToken: BigInt!
+  tokenDeployer: String!
+  tokenCreatedAt: BigInt!
+  tokenDocumentHash: String!
 }
 
-type Derivative @entity {
+type ERC20Implementation @entity {
   id: ID!
-  wrappedTokenTicker: String!
-  unlockTime: BigInt!
-  totalSupply: BigInt!
-  project: Project
-  holder: [UserHolding] @derivedFrom(field: "derivative")
-}
-
-type UserHolding @entity {
-  id: ID!
-  address: String!
-  amount: BigInt!
-  derivative: Derivative
-}
-
-type Lock @entity {
-  id: ID!
-  address: String!
-  tokenAmount: BigInt!
-  unlockTime: BigInt!
-  vestID: BigInt!
-  project: Project
+  address: String
+  name: String
+  ERC_20_Compliant: Boolean
+  Mintable: Boolean
+  Burnable: Boolean
+  Ownable: Boolean
+  Pauseable: Boolean
+  Capped: Boolean
+  Liquidity_Generator: Boolean
+  Donation_Charity: Boolean
+  Yield_Generator: Boolean
+  Taxable: Boolean
+  Verified: Boolean
+  advancedFeatures: String
 }

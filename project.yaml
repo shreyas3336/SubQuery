@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: Controller
+name: Mint
 version: 0.0.1
 runner:
   node:
@@ -8,53 +8,36 @@ runner:
   query:
     name: '@subql/query'
     version: '*'
-description: Controller Reverse Mapping testing
-
+description: Metadata for Mint
 repository: https://github.com/shreyas3336/SubQuery
 schema:
   file: ./schema.graphql
 network:
   chainId: '0x5c562e6300954998233c9a40b6b86f3028977e6d32d0da1af207738d19f98c1b'
-  endpoint: >-
-    wss://acala-mandala.api.onfinality.io/ws?apikey=2267b431-9138-4602-8f50-a4ea1dcd3951
+  endpoint: wss://mandala-tc7-rpcnode.aca-dev.network/ws
   chaintypes:
     file: ./dist/chaintypes.js
 dataSources:
   - kind: substrate/AcalaEvm
-    startBlock: 1361548
+    startBlock: 1415507
     processor:
       file: ./dist/acalaEvm.js
       options:
-        abi: controller
-        address: '0x3A4b355831529FE7a564f9c829CB689ac581156A'
+        abi: factory
+        address: '0xC1Ae4776FA9cC3e780dFb321CaA45A52926381D5'
     assets:
-      controller:
-        file: ./abi/Master.json
+      factory:
+        file: ./abis/Factory.json
     mapping:
       file: ./dist/index.js
       handlers:
-        - handler: handleProjectInfo
+        - handler: handleNewTokenDeployed
           kind: substrate/AcalaEvmEvent
           filter:
             topics:
-              - ProjectInfo(string name,address indexed tokenAddress,string tokenTicker,string documentHash,address creator,uint256 tokenDecimal)
-        - handler: handleCreateVest
+              - NewTokenDeployed(uint256,address,string,address)
+        - handler: handleNewImplementation
           kind: substrate/AcalaEvmEvent
           filter:
             topics:
-              - CreateVestController(address indexed assetAddress,address creator,address userAddress,uint256 userAmount,uint256 unlockTime,address wrappedERC20Address,string wrappedAssetTicker,bool transferable)
-        - handler: handleWithdraw
-          kind: substrate/AcalaEvmEvent
-          filter:
-            topics:
-              - WithdrawController(address indexed userAddress,uint256 amount,address wrappedTokenAddress)
-        - handler: handleCreateVestLock
-          kind: substrate/AcalaEvmEvent
-          filter:
-            topics:
-              - CreateVestVesting(uint256 vestID,address indexed assetAddress,address creator,address userAddress,uint256 userAmount,uint256 unlockTime)
-        - handler: handleWithdrawLock
-          kind: substrate/AcalaEvmEvent
-          filter:
-            topics:
-              - WithdrawVesting(uint256 vestID,address indexed userAddress,uint256 amount,address wrappedTokenAddress,uint256 unlockTime)
+              - NewERC20Implementation(string,uint256,address,bool,bool[4])

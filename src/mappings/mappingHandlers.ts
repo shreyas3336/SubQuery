@@ -1,254 +1,79 @@
-import {Project, Derivative, UserHolding, Lock } from "../types";
+import {TokenDeployed, ERC20Implementation} from "../types";
 import { AcalaEvmEvent, AcalaEvmCall } from '@subql/acala-evm-processor';
 import { BigNumber } from "ethers";
 
-type ProjectInfo = [string, string, string, string, string, BigNumber] & { 
-    name: string; 
-    tokenAddress: string; 
-    tokenTicker: string; 
+// Setup types from ABI
+type NewTokenDeployed = [BigNumber,string,string, string] & { 
+    tokenType: BigNumber; 
+    token: string; 
     documentHash: string; 
-    creator: string; 
-    tokenDecimal:BigNumber; 
+    deployer: string;
 };
-type CreateVest = [string,string,string,BigNumber,BigNumber,string,string, Boolean] & {
-    assetAddress: string;
-    creator: string;
-    userAddress: string;
-    userAmount: BigNumber;
-    unlockTime: BigNumber;
-    wrappedERC20Address: string;
-    wrappedAssetTicker: string;
-    transferable: Boolean;
-};
-type CreateVestLock = [BigNumber,string,string,string,BigNumber,BigNumber] & {
-    vestID: BigNumber;
-    assetAddress: string;
-    creator: string;
-    userAddress: string;
-    userAmount: BigNumber;
-    unlockTime: BigNumber;
-};
-type WithdrawController = [string,BigNumber,string] & {
-    userAddress: string;
-    amount: BigNumber;
-    wrappedTokenAddress: string;
-};
-type WithdrawVesting = [BigNumber,string,BigNumber,string,BigNumber] & {
-  vestID: BigNumber;
-  userAddress: string;
-  amount: BigNumber;
-  wrappedTokenAddress: string;
-  unlockTime: BigNumber;
-};
-type TransferWrapped = [string,string,string,BigNumber] & {
-  userAddress: string;
-  wrappedTokenAddress: string;
-  receiverAddress: string;
-  amount: BigNumber;
+type NewERC20Implementation = [string,BigNumber,string,boolean,boolean[]] & { 
+    typeOfToken: string; 
+    typeID: BigNumber; 
+    implementation: string;
+    isReflective: boolean;
+    features: boolean[];
 };
 
-function generateID(_user: string, _ticker: string): string {
-    return _user.concat("-LOCK-").concat(_ticker);
-  }
-
-export async function handleProjectInfo(event: AcalaEvmEvent<ProjectInfo>): Promise<void> {
-    let _projectName = event.args.name.toString();
-    let _projectTokenAddress = event.args.tokenAddress.toString();
-    let _projectTokenTicker = event.args.tokenTicker.toString();
-    let _projectDocHash = event.args.documentHash.toString();
-    let _projectOwner = event.args.creator.toString();
-    let _projectDecimal = event.args.tokenDecimal.toBigInt();
-
-    let _projectID = generateID(_projectOwner,_projectTokenAddress);
-
-    let project = await Project.get(_projectID);
-    if(project === undefined) {
-        project = new Project(_projectID);
-        project.projectOwnerAddress = _projectOwner;
-        project.projectName = _projectName;
-        project.projectTokenAddress = _projectTokenAddress;
-        project.projectTokenTicker = _projectTokenTicker;
-        project.projectDocHash = _projectDocHash;
-        project.projectTokenDecimal = _projectDecimal;
+export async function handleNewTokenDeployed(event: AcalaEvmEvent<NewTokenDeployed>): Promise<void> {
+    let entity = await TokenDeployed.get(event.args.token.toString());
+    if(!entity) {
+        entity = new TokenDeployed(event.args.token.toString());
+        entity.tokenDeployer = event.args.deployer.toString();
+        entity.typeOfToken = event.args.tokenType.toBigInt();
+        entity.tokenCreatedAt = BigInt(event.blockTimestamp.getTime());
+        entity.tokenDocumentHash = event.args.documentHash.toString();
     }
-    project.save();
+    await entity.save();
 }
 
-export async function handleCreateVest(event: AcalaEvmEvent<CreateVest>): Promise<void> {
-    // Getting all the required data from the Event.
-    let _userAddress = event.args.userAddress.toString();
-    let _projectCreator = event.args.creator.toString();
-    let _projectAddress = event.args.assetAddress.toString();
-    let _tokenAmount = event.args.userAmount.toBigInt();
-    let _unlockTime = event.args.unlockTime.toBigInt();
-    let _wrappedTokenAddress = event.args.wrappedERC20Address.toString();
-    let _wrappedTokenTicker = event.args.wrappedAssetTicker.toString();
-
-     // Generting a Unique Project ID, i.e. a combination of Project Creator & Project Address
-    let _projectID = generateID(_projectCreator, _projectAddress);
-    let project = await Project.get(_projectID);
-    if(project) {
-        // If the project exists. Check the corresponding derivative asset exists or not.
-        let derivative = await Derivative.get(_wrappedTokenAddress);
-        if(!derivative) {
-            // If the derivative asset doesn't exist, create one.
-            derivative = new Derivative(_wrappedTokenAddress);
-            derivative.wrappedTokenTicker = _wrappedTokenTicker;
-            derivative.totalSupply = BigInt(0);
-            derivative.unlockTime = _unlockTime;
-            derivative.projectId = project.id.toString();
-            await derivative.save();
-        }
-        
-        // Increase the Total Supply of the Derivative Asset.
-        let derivativeSupply = derivative.totalSupply;
-        derivative.totalSupply = derivativeSupply + _tokenAmount;
-
-        // Creating a unique User ID, i.e. a combination of the User Address & the Wrapped Asset Address.
-        let userHoldingsID = generateID(_userAddress, _wrappedTokenAddress);
-
-        // Checking if the User already exists w.r.t the Wrapped Asset
-        let userHoldings = await UserHolding.get(userHoldingsID);
-        if (!userHoldings){
-            // If the User doesn't exist, create one.
-            userHoldings = new UserHolding(userHoldingsID);
-            userHoldings.amount = BigInt(0);
-            userHoldings.address = _userAddress;
-            userHoldings.derivativeId = derivative.id.toString();
-        }
-        // Increase the Wrapped Asset Holdings of the User.
-        let userTokenAmount = userHoldings.amount;
-        userHoldings.amount = userTokenAmount + _tokenAmount;
-        await userHoldings.save();
-        await derivative.save();
+export async function handleNewImplementation(event: AcalaEvmCall<NewERC20Implementation>): Promise<void> {
+    let entity = await ERC20Implementation.get(event.args.typeID.toHexString());
+    if (!entity) {
+        entity = new ERC20Implementation(event.args.typeID.toHexString());
+        entity.address = event.args.implementation.toString();
+        entity.name = event.args.typeOfToken.toString();
+        entity.ERC_20_Compliant = true;
+        entity.Verified = true;
+        entity.Ownable = true;
+        if(event.args.isReflective) {
+            entity.Mintable = false
+            entity.Burnable = false
+            entity.Pauseable = false
+            entity.Yield_Generator = event.args.features[0]
+            entity.Taxable = event.args.features[1]
+            entity.Liquidity_Generator = event.args.features[2]
+            entity.Donation_Charity = event.args.features[3]
+            entity.Capped = true;
+            entity.advancedFeatures = "10100000"
+            
+            if (event.args.features[1]) {
+                entity.advancedFeatures = entity.advancedFeatures!.substring(0,3) + "1" + entity.advancedFeatures!.substring(4)
+            }
+            if (event.args.features[2]) {
+                entity.advancedFeatures = entity.advancedFeatures!.substring(0,4) + "1" + entity.advancedFeatures!.substring(5)
+                entity.advancedFeatures = entity.advancedFeatures!.substring(0,6) + "1" + entity.advancedFeatures!.substring(7)
+            }
+            if (event.args.features[3]) {
+                entity.advancedFeatures = entity.advancedFeatures!.substring(0,5) + "1" + entity.advancedFeatures!.substring(6)
+                entity.advancedFeatures = entity.advancedFeatures!.substring(0,7) + "1"
+            }
+        } else {
+            entity.Mintable = event.args.features[0]
+            entity.Burnable = event.args.features[1]
+            entity.Pauseable = event.args.features[2]
+            entity.Capped = event.args.features[3]
+            entity.Yield_Generator = false
+            entity.Taxable = false
+            entity.Liquidity_Generator = false
+            entity.Donation_Charity = false
+            entity.advancedFeatures = "10000000"
+            if (event.args.features[3]) {
+              entity.advancedFeatures = entity.advancedFeatures!.substring(0,1) + "1" + entity.advancedFeatures!.substring(2)
+            }
+        } 
     }
-}
-
-export async function handleWithdraw(event: AcalaEvmEvent<WithdrawController>): Promise<void>{
-    // Getting all the required data from the Event.
-  let _userAddress = event.args.userAddress.toString();
-  let _amount = event.args.amount.toBigInt();
-  let _wrappedTokenAddress = event.args.wrappedTokenAddress.toString();
-
-  // Loading the Derivative Asset.
-  let derivative = await Derivative.get(_wrappedTokenAddress);
-  if(derivative){
-    // Decreasing the Total Supply of the Derivative Asset.
-    let derivativeTotalSupply = derivative.totalSupply;
-    derivative.totalSupply = derivativeTotalSupply - _amount;
-
-    // Creating a unique User ID, i.e. a combination of the User Address & the Wrapped Asset Address.
-    let userID = generateID(_userAddress, _wrappedTokenAddress);
-
-    // Retrieving the User w.r.t the Wrapped Asset
-    let userHoldings = await UserHolding.get(userID);
-    if(userHoldings){
-      // Updating the Balance of User Address
-      let userTokenAmount = userHoldings.amount;
-      userHoldings.amount = userTokenAmount - _amount;
-      await userHoldings.save();
-    }
-    await derivative.save();
-  }
-}
-
-export async function handleTransferWrapped(event: AcalaEvmEvent<TransferWrapped>): Promise<void>{
-  // Getting all the required data from the Event.
-let _userAddress = event.args.userAddress.toString();
-let _wrappedTokenAddress = event.args.wrappedTokenAddress.toString();
-let _receiverAddress = event.args.receiverAddress.toString();
-let _transferAmount = event.args.amount.toBigInt();
-
-// Check the corresponding derivative asset exists or not.
-if (_receiverAddress.toLocaleLowerCase() != "0x06F3dE6ffE53e86BA2c05c9572E1449Ff05D756a".toLocaleLowerCase()){
-  let derivative = await Derivative.get(_wrappedTokenAddress);
-  if(derivative){
-    // Creating a unique User ID, i.e. a combination of the User Address & the Wrapped Asset Address.
-    let senderID = generateID(_userAddress, _wrappedTokenAddress);
-
-    // Retrieving the User w.r.t the Wrapped Asset
-    let senderUserHoldings = await UserHolding.get(senderID);
-    if(senderUserHoldings){
-      // Updating the Balance of Sender Address
-      let senderTokenAmount = senderUserHoldings.amount;
-      senderUserHoldings.amount = senderTokenAmount - _transferAmount;
-      await senderUserHoldings.save();
-
-      // Creating a unique User ID, i.e. a combination of the User Address & the Wrapped Asset Address.
-      let receiverID = generateID(_receiverAddress, _wrappedTokenAddress);
-
-      // Checking if the User already exists w.r.t the Wrapped Asset
-      let receiverUserHoldings = await UserHolding.get(receiverID);
-      if (!receiverUserHoldings){
-        // If the User doesn't exist, create one.
-        receiverUserHoldings = new UserHolding(receiverID);
-        receiverUserHoldings.address = _receiverAddress;
-        receiverUserHoldings.amount = BigInt(0);
-        receiverUserHoldings.derivativeId = derivative.id.toString();
-      }
-
-      // Updating the Balance of Receiver Address
-      let receiverTokenAmount = receiverUserHoldings.amount;
-      receiverUserHoldings.amount = receiverTokenAmount + _transferAmount;
-      await receiverUserHoldings.save();
-    }
-    await derivative.save();
-  }
-}
-}
-
-export async function handleCreateVestLock(event: AcalaEvmEvent<CreateVestLock>): Promise<void>{
-  // Getting all the required data from the Event.
-  let _userAddress = event.args.userAddress.toString();
-  let _projectCreator = event.args.creator.toString();
-  let _projectAddress = event.args.assetAddress.toString();
-  let _tokenAmount = event.args.userAmount.toBigInt();
-  let _unlockTime = event.args.unlockTime.toBigInt();
-  let _vestID = event.args.vestID.toBigInt();
-
-  // Generting a Unique Project ID, i.e. a combination of Project Creator & Project Address
-  let _projectID = generateID(_projectCreator, _projectAddress);
-
-  // Checking if the project already exists.
-  let project = await Project.get(_projectID);
-  if(project) {
-    // Creating a unique Lock ID, i.e. a combination of the ProjectID & VestID.
-    let _lockID = generateID(_projectAddress,_vestID.toString());
-
-    // If the project exists. Check the corresponding Lock exists or not.
-    let lock = await Lock.get(_lockID);
-    if(!lock) {
-      // If the Lock doesn't exist, create one.
-      lock = new Lock(_lockID);
-      lock.address = _userAddress;
-      lock.tokenAmount = _tokenAmount;
-      lock.unlockTime = _unlockTime;
-      lock.vestID = _vestID;
-      lock.projectId = project.id.toString();
-    }
-    await lock.save();
-  }
-  await project.save();
-} 
-
-export async function handleWithdrawLock(event: AcalaEvmEvent<WithdrawVesting>): Promise<void> {
-  // Getting all the required data from the Event.
-  let _userAddress = event.args.userAddress.toString();
-  let _amount = event.args.amount.toBigInt();
-  let _wrappedTokenAddress = event.args.wrappedTokenAddress.toString();
-  let _unlockTime = event.args.unlockTime.toBigInt();
-  let _vestID = event.args.vestID.toBigInt();
-
-  // Creating a unique Lock ID, i.e. a combination of the Asset Address & VestID.
-  let _userID = generateID(_wrappedTokenAddress, _vestID.toString());
-
-  // Loading the Lock Asset.
-  let lock = await Lock.get(_userID);
-  if (lock) {
-    if(lock.unlockTime === _unlockTime && lock.address === _userAddress){
-      let amount = lock.tokenAmount;
-      lock.tokenAmount = amount - _amount;
-    }
-  }
-  await lock.save();
+    await entity.save();
 }
