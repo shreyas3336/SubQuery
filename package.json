@@ -1,7 +1,7 @@
 {
-  "name": "Controller",
+  "name": "Mint",
   "version": "0.0.1",
-  "description": "Controller Reverse Mapping testing",
+  "description": "Metadata for Mint",
   "main": "dist/index.js",
   "scripts": {
     "build": "subql build",
@@ -17,7 +17,7 @@
     "project.yaml"
   ],
   "author": "Shreyas",
-  "license": "GNU-GPL3",
+  "license": "MIT",
   "dependencies": {
     "@acala-network/type-definitions": "^4.1.1",
     "@subql/acala-evm-processor": "^0.0.1-0"
@@ -31,8 +31,5 @@
   "exports": {
     "acalaEvm": "./node_modules/@subql/acala-evm-processor/dist/index.js",
     "chaintypes": "./src/chaintypes.ts"
-  },
-  "resolutions": {
-    "ipfs-unixfs": "6.0.6"
   }
 }
