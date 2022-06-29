@@ -24,7 +24,7 @@ dataSources:
       file: ./dist/acalaEvm.js
       options:
         abi: factory
-        address: '0xC1Ae4776FA9cC3e780dFb321CaA45A52926381D5'
+        address: '0x1f1d2AF41DcF0E8ecCD427160D8E6e551A257a70'
     assets:
       factory:
         file: ./abis/Factory.json
